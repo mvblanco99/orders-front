@@ -12,14 +12,167 @@
 // to match your app's branding.
 // Tip: Use the "Theme Builder" on Quasar's documentation website.
 
-$primary: #1976d2;
-$secondary: #26a69a;
+$primary: #002f86;
+$secondary: #dd0c15;
 $accent: #9c27b0;
 
 $dark: #1d1d1d;
 $dark-page: #121212;
 
-$positive: #21ba45;
-$negative: #c10015;
+$positive: #17b26a;
+$negative: #f04438;
 $info: #31ccec;
-$warning: #f2c037;
+$warning: #f79009;
+
+$rounded-borders: 14px;
+
+$background-light: #fdfdfd;
+
+$primary-25: #f0f4ff;
+$primary-50: #e0e9fe;
+$primary-100: #caddfd;
+$primary-200: #a6c6fc;
+$primary-300: #7aa8f9;
+$primary-400: #4985f1;
+$primary-500: #1f64e1;
+$primary-600: $primary;
+$primary-700: #00256a;
+$primary-800: #001c51;
+$primary-900: #00143b;
+
+$grey-50: #f9fafb;
+$grey-100: #f2f4f7;
+$grey-200: #e4e7ec;
+$grey-300: #d0d5dd;
+$grey-400: #98a2b3;
+$grey-500: #667085;
+$grey-600: #475467;
+$grey-700: #344054;
+$grey-800: #182230;
+$grey-900: #101828;
+
+$slate-50: #f8fafc;
+$slate-100: #f1f5f9;
+$slate-200: #e2e8f0;
+$slate-300: #cbd5e1;
+$slate-400: #94a3b8;
+$slate-500: #64748b;
+$slate-600: #475569;
+$slate-700: #334155;
+$slate-800: #1e293b;
+$slate-900: #0f172a;
+$slate-950: #020617;
+
+$success-50: #ecfdf3;
+$success-100: #dcfae6;
+$success-200: #a9efc5;
+$success-300: #75e0a7;
+$success-400: #47cd89;
+$success-500: $positive;
+$success-600: #079455;
+$success-700: #067647;
+$success-800: #085d3a;
+$success-900: #074d31;
+$success-950: #053321;
+
+$warning-50: #fffbeb;
+$warning-100: #fef0c7;
+$warning-200: #fedf89;
+$warning-300: #fec84b;
+$warning-400: #fdb022;
+$warning-500: $warning;
+$warning-600: #dc6803;
+$warning-700: #b54708;
+$warning-800: #93370d;
+$warning-900: #7a2e0e;
+$warning-950: #4e1d09;
+
+$error-50: #fef3f2;
+$error-100: #fee4e2;
+$error-200: #fecdca;
+$error-300: #fda29b;
+$error-400: #f97066;
+$error-500: #f04438;
+$error-600: #d92d20;
+$error-700: #b42318;
+$error-800: #912018;
+$error-900: #7a271a;
+$error-950: #55160c;
+
+$colors: (
+  primary: $primary,
+  secondary: $secondary,
+  accent: $accent,
+  dark: $dark,
+  dark-page: $dark-page,
+  positive: $positive,
+  negative: $negative,
+  info: $info,
+  warning: $warning,
+  background-light: $background-light,
+  primary-25: $primary-25,
+  primary-50: $primary-50,
+  primary-100: $primary-100,
+  primary-200: $primary-200,
+  primary-300: $primary-300,
+  primary-400: $primary-400,
+  primary-500: $primary-500,
+  primary-600: $primary-600,
+  primary-700: $primary-700,
+  primary-800: $primary-800,
+  primary-900: $primary-900,
+  grey-50: $grey-50,
+  grey-100: $grey-100,
+  grey-200: $grey-200,
+  grey-300: $grey-300,
+  grey-400: $grey-400,
+  grey-500: $grey-500,
+  grey-600: $grey-600,
+  grey-700: $grey-700,
+  grey-800: $grey-800,
+  grey-900: $grey-900,
+  slate-50: $slate-50,
+  slate-100: $slate-100,
+  slate-200: $slate-200,
+  slate-300: $slate-300,
+  slate-400: $slate-400,
+  slate-500: $slate-500,
+  slate-600: $slate-600,
+  slate-700: $slate-700,
+  slate-800: $slate-800,
+  slate-900: $slate-900,
+  slate-950: $slate-950,
+  success-50: $success-50,
+  success-100: $success-100,
+  success-200: $success-200,
+  success-300: $success-300,
+  success-400: $success-400,
+  success-500: $success-500,
+  success-600: $success-600,
+  success-700: $success-700,
+  success-800: $success-800,
+  success-900: $success-900,
+  success-950: $success-950,
+  warning-50: $warning-50,
+  warning-100: $warning-100,
+  warning-200: $warning-200,
+  warning-300: $warning-300,
+  warning-400: $warning-400,
+  warning-500: $warning-500,
+  warning-600: $warning-600,
+  warning-700: $warning-700,
+  warning-800: $warning-800,
+  warning-900: $warning-900,
+  warning-950: $warning-950,
+  error-50: $error-50,
+  error-100: $error-100,
+  error-200: $error-200,
+  error-300: $error-300,
+  error-400: $error-400,
+  error-500: $error-500,
+  error-600: $error-600,
+  error-700: $error-700,
+  error-800: $error-800,
+  error-900: $error-900,
+  error-950: $error-950,
+);

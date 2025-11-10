@@ -1,0 +1,52 @@
+.q-field.q-field--outlined .q-field__control,
+.q-field.q-field--outline .q-field__control,
+.q-field--filled .q-field__control {
+  border-radius: $rounded-borders;
+  padding: 0 14px;
+  // overflow: hidden; // Eliminado para permitir ver el menú de autocomplete
+}
+.q-field--filled .q-field__control {
+  background: rgba(0, 0, 50, 0.05);
+}
+
+.q-field--filled.q-field--highlighted .q-field__control:before {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+// COMENTE PARA QUITAR EL PROBLEMA DEL AUTOCOMPLETE
+// .q-field:not(.q-field--dense) .q-field__control:has(input),
+// .q-field:not(.q-field--dense) .q-field__marginal {
+//   height: 48px;
+// }
+
+// COMENTE PARA QUITAR EL PROBLEMA DEL AUTOCOMPLETE
+// .q-field__input {
+//   min-height: 0;
+// }
+
+.q-field__label {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.q-field--outlined .q-field__control:before,
+.q-field--outline .q-field__control:before {
+  border: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.input-qty {
+  text-align: center;
+}
+
+input[type='number'].input-qty::-webkit-inner-spin-button,
+input[type='number'].input-qty::-webkit-outer-spin-button,
+input[type='number'].input-discount::-webkit-inner-spin-button,
+input[type='number'].input-discount::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type='number'].input-qty,
+input[type='number'].input-discount {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}

@@ -1,0 +1,100 @@
+@font-face {
+  font-family: Poppins;
+  src: url(./fonts/Poppins/Poppins-Regular.ttf);
+  font-weight: normal, 300, 400;
+}
+
+@font-face {
+  font-family: Poppins;
+  src: url(./fonts/Poppins/Poppins-Medium.ttf);
+  font-weight: 500;
+}
+
+@font-face {
+  font-family: Poppins;
+  src: url(./fonts/Poppins/Poppins-SemiBold.ttf);
+  font-weight: 600;
+}
+
+@font-face {
+  font-family: Poppins;
+  src: url(./fonts/Poppins/Poppins-Bold.ttf);
+  font-weight: 700;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+}
+
+body,
+p,
+.text-body1 {
+  font-size: 1.6rem;
+  line-height: 2.4rem;
+}
+
+.text-body2 {
+  font-size: 1.4rem;
+  line-height: 2.2rem;
+}
+
+.text-subtitle1 {
+  font-size: 1.8rem;
+  line-height: 2.5rem;
+}
+
+.text-subtitle2 {
+  font-size: 1.6rem;
+  line-height: 1.4;
+}
+
+.text-caption {
+  font-size: 1.4rem;
+  line-height: 2rem;
+}
+
+h1 {
+  font-size: 3.4rem;
+  line-height: 42px;
+  font-weight: 600;
+}
+
+h2 {
+  font-size: 2.4rem;
+  line-height: 1.4;
+  font-weight: 600;
+}
+
+.text-weight-semi-bold {
+  font-weight: 600;
+}
+
+.text-primary {
+  color: $grey-900;
+}
+
+.text-secondary {
+  color: $grey-700 !important;
+}
+
+.text-tertiary {
+  color: $grey-600;
+}
+
+.text-tiny {
+  font-size: 11px;
+}
+
+@media (max-width: 500px) {
+  h1.title {
+    font-size: 2.4rem;
+    line-height: 35px;
+  }
+  h2.title {
+    font-size: 1.8rem;
+    line-height: 25px;
+  }
+  .text-subtitle2 {
+    line-height: 1.3;
+  }
+}

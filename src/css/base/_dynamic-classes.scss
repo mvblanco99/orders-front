@@ -1,0 +1,13 @@
+@each $color-name, $color-value in $colors {
+  .border-color-#{$color-name} {
+    border: 1px solid $color-value !important;
+  }
+
+  .bg-color-#{$color-name} {
+    background-color: $color-value !important;
+  }
+
+  .text-color-#{$color-name} {
+    color: $color-value !important;
+  }
+}

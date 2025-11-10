@@ -1,0 +1,15 @@
+.q-stepper.stepper__password .q-stepper__dot {
+  font-size: 2rem;
+  width: 48px !important;
+  min-width: 48px !important;
+  height: 48px !important;
+}
+
+.q-stepper--dark .q-stepper__dot span {
+  color: $primary;
+}
+
+.q-stepper__title {
+  font-size: 1.6rem;
+  line-height: 1.8 !important;
+}
