@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { QTableColumn } from 'quasar';
+import type { QTableColumn } from 'quasar';
 import type { OrderPart } from '../interfaces/order.interface';
 
 interface Props {

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { useDialogPluginComponent, QTableColumn } from 'quasar';
+import type { QTableColumn } from 'quasar';
+import { useDialogPluginComponent } from 'quasar';
 import { useOrderAssignment } from '../composables/useOrderAssignment';
 import type { OrderPart } from '../interfaces/order.interface';
 
@@ -28,7 +29,7 @@ const loadOrder = async () => {
   }
 };
 
-loadOrder();
+await loadOrder();
 
 const columns: QTableColumn[] = [
   {
@@ -72,7 +73,7 @@ const handleAssign = async () => {
       partIds,
     });
     onDialogOK();
-  } catch (error) {
+  } catch {
     // Error handled by composable
   } finally {
     loading.value = false;

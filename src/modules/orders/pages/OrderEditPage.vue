@@ -103,15 +103,15 @@ const handleSubmit = async () => {
 
   try {
     await updateOrder(orderId);
-    router.push({ name: 'order-detail', params: { id: orderId } });
-  } catch (error) {
+    void router.push({ name: 'order-detail', params: { id: orderId } });
+  } catch {
     // Error handled by composable
   }
 };
 
 const handleCancel = () => {
   orderStore.resetUpdateOrderDto();
-  router.push({ name: 'order-detail', params: { id: orderId } });
+  void router.push({ name: 'order-detail', params: { id: orderId } });
 };
 </script>
 

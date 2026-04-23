@@ -115,15 +115,15 @@ const handleSubmit = async () => {
 
   try {
     await createOrder();
-    router.push({ name: 'order-list' });
-  } catch (error) {
+    void router.push({ name: 'order-list' });
+  } catch {
     // Error handled by composable
   }
 };
 
 const handleCancel = () => {
   orderStore.resetCreateOrderDto();
-  router.push({ name: 'order-list' });
+  void router.push({ name: 'order-list' });
 };
 </script>
 

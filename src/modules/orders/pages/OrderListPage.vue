@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { QTableColumn, useQuasar } from 'quasar';
+import { useQuasar } from 'quasar';
+import type { QTableColumn } from 'quasar';
 import { useOrders } from '../composables/useOrders';
 import OrderFilters from '../components/OrderFilters.vue';
 import AssignPartsDialog from '../components/AssignPartsDialog.vue';
@@ -9,7 +10,7 @@ import type { Order } from '../interfaces/order.interface';
 
 const router = useRouter();
 const $q = useQuasar();
-const { orders, totalOrders, currentPage, totalPages, fetchOrders, deleteOrder } = useOrders();
+const { orders, totalOrders, currentPage, fetchOrders, deleteOrder } = useOrders();
 
 const loading = ref(false);
 const showFilters = ref(false);
@@ -66,8 +67,8 @@ const columns: QTableColumn[] = [
   },
 ];
 
-onMounted(() => {
-  loadOrders();
+onMounted(async () => {
+  await loadOrders();
 });
 
 const loadOrders = async () => {
@@ -88,15 +89,15 @@ const handleClear = async () => {
 };
 
 const goToCreate = () => {
-  router.push({ name: 'order-create' });
+  void router.push({ name: 'order-create' });
 };
 
 const goToDetail = (order: Order) => {
-  router.push({ name: 'order-detail', params: { id: order.id } });
+  void router.push({ name: 'order-detail', params: { id: order.id } });
 };
 
 const goToEdit = (order: Order) => {
-  router.push({ name: 'order-edit', params: { id: order.id } });
+  void router.push({ name: 'order-edit', params: { id: order.id } });
 };
 
 const handleAssign = (order: Order) => {
@@ -106,7 +107,7 @@ const handleAssign = (order: Order) => {
       orderNumber: order.orderNumber,
     },
   }).onOk(() => {
-    loadOrders();
+    void loadOrders();
   });
 };
 
@@ -125,9 +126,13 @@ const confirmDelete = (order: Order) => {
       color: 'negative',
     },
     persistent: true,
-  }).onOk(async () => {
-    await deleteOrder(order.id);
-    await loadOrders();
+  }).onOk(() => {
+    const exec = async () => {
+      await deleteOrder(order.id);
+      await loadOrders();
+    };
+
+    void exec();
   });
 };
 

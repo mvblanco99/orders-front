@@ -22,11 +22,11 @@ onMounted(async () => {
 });
 
 const goBack = () => {
-  router.push({ name: 'order-list' });
+  void router.push({ name: 'order-list' });
 };
 
 const goToEdit = () => {
-  router.push({ name: 'order-edit', params: { id: orderId } });
+  void router.push({ name: 'order-edit', params: { id: orderId } });
 };
 
 const getStatusColor = (status: string) => {
