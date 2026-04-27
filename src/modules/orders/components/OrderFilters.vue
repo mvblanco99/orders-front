@@ -1,9 +1,20 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { useOrderStore } from '../stores/useOrderStore';
+import useDropDown from 'src/modules/shared/composables/useDropDowns';
+import { OrderStatus } from '../interfaces/order.interface';
 
 const orderStore = useOrderStore();
 const { searchParams } = storeToRefs(orderStore);
+const { zones: zoneOptions } = useDropDown('zones');
+const { users: usersOptions } = useDropDown('users');
+
+const orderStatusOptions = [
+  { label: 'Pendiente', value: OrderStatus.PENDING },
+  { label: 'En proceso', value: OrderStatus.PROCESSING },
+  { label: 'Completado', value: OrderStatus.COMPLETED },
+  { label: 'Cancelado', value: OrderStatus.CANCELLED },
+];
 
 const emit = defineEmits<{
   search: [];
@@ -30,12 +41,11 @@ const handleClear = () => {
 
       <div class="row q-col-gutter-md">
         <!-- Número de orden -->
-        <div class="col-12 col-sm-6 col-md-3">
+        <div class="col-xs-12 col-sm-6 col-md-4">
           <q-input
             v-model="searchParams.orderNumber"
             label="Número de orden"
             outlined
-            dense
             clearable
             @keyup.enter="handleSearch"
           >
@@ -46,15 +56,12 @@ const handleClear = () => {
         </div>
 
         <!-- Zona -->
-        <div class="col-12 col-sm-6 col-md-3">
+        <div class="col-xs-12 col-sm-6 col-md-4">
           <q-select
             v-model="searchParams.zoneId"
             label="Zona"
             outlined
-            dense
-            :options="[]"
-            option-value="id"
-            option-label="name"
+            :options="zoneOptions"
             emit-value
             map-options
             clearable
@@ -66,12 +73,11 @@ const handleClear = () => {
         </div>
 
         <!-- Fecha inicio -->
-        <div class="col-12 col-sm-6 col-md-3">
+        <div class="col-xs-12 col-sm-6 col-md-4">
           <q-input
             v-model="searchParams.startDate"
             label="Fecha inicio"
             outlined
-            dense
             type="date"
             clearable
           >
@@ -82,15 +88,8 @@ const handleClear = () => {
         </div>
 
         <!-- Fecha fin -->
-        <div class="col-12 col-sm-6 col-md-3">
-          <q-input
-            v-model="searchParams.endDate"
-            label="Fecha fin"
-            outlined
-            dense
-            type="date"
-            clearable
-          >
+        <div class="col-xs-12 col-sm-6 col-md-4">
+          <q-input v-model="searchParams.endDate" label="Fecha fin" outlined type="date" clearable>
             <template v-slot:prepend>
               <q-icon name="sym_r_calendar_today" />
             </template>
@@ -98,15 +97,12 @@ const handleClear = () => {
         </div>
 
         <!-- Picker -->
-        <div class="col-12 col-sm-6 col-md-3">
+        <div class="col-xs-12 col-sm-6 col-md-4">
           <q-select
             v-model="searchParams.pickerId"
             label="Picker"
             outlined
-            dense
-            :options="[]"
-            option-value="id"
-            option-label="name"
+            :options="usersOptions"
             emit-value
             map-options
             clearable
@@ -118,15 +114,12 @@ const handleClear = () => {
         </div>
 
         <!-- Rechecker -->
-        <div class="col-12 col-sm-6 col-md-3">
+        <div class="col-xs-12 col-sm-6 col-md-4">
           <q-select
             v-model="searchParams.recheckerId"
             label="Rechecker"
             outlined
-            dense
-            :options="[]"
-            option-value="id"
-            option-label="name"
+            :options="usersOptions"
             emit-value
             map-options
             clearable
@@ -138,15 +131,12 @@ const handleClear = () => {
         </div>
 
         <!-- Packer -->
-        <div class="col-12 col-sm-6 col-md-3">
+        <div class="col-xs-12 col-sm-6 col-md-4">
           <q-select
             v-model="searchParams.packerId"
             label="Packer"
             outlined
-            dense
-            :options="[]"
-            option-value="id"
-            option-label="name"
+            :options="usersOptions"
             emit-value
             map-options
             clearable
@@ -157,25 +147,19 @@ const handleClear = () => {
           </q-select>
         </div>
 
-        <!-- Estado activo -->
-        <div class="col-12 col-sm-6 col-md-3">
+        <!-- Estatus de orden -->
+        <div class="col-xs-12 col-sm-6 col-md-4">
           <q-select
-            v-model="searchParams.isActive"
-            label="Estado"
+            v-model="searchParams.status"
+            label="Estatus"
             outlined
-            dense
-            :options="[
-              { label: 'Activo', value: true },
-              { label: 'Inactivo', value: false },
-            ]"
-            option-value="value"
-            option-label="label"
+            :options="orderStatusOptions"
             emit-value
             map-options
             clearable
           >
             <template v-slot:prepend>
-              <q-icon name="sym_r_toggle_on" />
+              <q-icon name="sym_r_assignment" />
             </template>
           </q-select>
         </div>

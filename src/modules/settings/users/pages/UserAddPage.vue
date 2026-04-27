@@ -1,21 +1,14 @@
 <script setup lang="ts">
-import { onBeforeUnmount, ref, watch } from 'vue';
-import { Dialog, QForm } from 'quasar';
+import { onBeforeUnmount, ref } from 'vue';
+import { QForm } from 'quasar';
 import useValidators from 'src/modules/shared/composables/useValidators';
-import useDropDownByType from 'src/modules/shared/composables/useDropDownsByType';
 import useDropDown from 'src/modules/shared/composables/useDropDowns';
 import HorizontalConfigCard from '../components/HorizontalConfigCard.vue';
-import { TypeTenantEnum, UserProfileId } from '../interfaces/userInterface';
-import DefineCustomersDialog from '../components/DefineCustomersDialog.vue';
-import useAddUserMutation from '../composables/useAddUserMutation';
-import SelectAutoComplete from '../components/SelectAutoComplete.vue';
+import useCreateUserMutation from '../composables/useCreateUserMutation';
 import { useRouter } from 'vue-router';
 import { UsersRoutesEnum } from '../router';
 
-const { manufacturers } = useDropDown('manufacturers');
-const { erpClients } = useDropDown('erp_clients');
-const { erpSalespeople } = useDropDown('erp_salespeople');
-const { profilesByTenant, type } = useDropDownByType('profiles-by-tenant');
+const { profiles } = useDropDown('profiles');
 const router = useRouter();
 
 const viewUserList = async () => {
@@ -23,37 +16,15 @@ const viewUserList = async () => {
 };
 
 const { isRequired, isPassword } = useValidators();
-const { userDto, createUserMutation, userCreatedResponse, resetDto } = useAddUserMutation();
+const { createUserDto, createUserMutation, resetDto } = useCreateUserMutation();
 
 const myForm = ref<QForm>();
 const isPwd = ref(true);
 
 const onSubmit = async () => {
   if (!(await myForm.value?.validate())) return;
-  await createUserMutation.mutateAsync(userDto.value);
+  await createUserMutation.mutateAsync();
 };
-
-const openDefineCustomersDialog = () => {
-  Dialog.create({
-    component: DefineCustomersDialog,
-    componentProps: {
-      userId: userCreatedResponse.value?.id,
-      name: userCreatedResponse.value?.user.name,
-      profile: userCreatedResponse.value?.user.profileId,
-    },
-  });
-};
-
-watch(
-  userDto,
-  (newVal) => {
-    if (!newVal) return;
-    type.value = userDto.value.typeTenant;
-  },
-  {
-    deep: true,
-  },
-);
 
 onBeforeUnmount(() => {
   resetDto();
@@ -92,78 +63,13 @@ onBeforeUnmount(() => {
           <template v-slot:right>
             <div class="row q-col-gutter-md">
               <div class="col-12">
-                <div class="text-weight-light text-blue-grey-5">Tipo</div>
-              </div>
-
-              <div class="col-xs-12 col-sm-12">
-                <q-select
-                  outlined
-                  v-model="userDto.typeTenant"
-                  :options="[
-                    {
-                      label: 'Cliente',
-                      value: TypeTenantEnum.CLIENT,
-                    },
-                    {
-                      label: 'Vital',
-                      value: TypeTenantEnum.VITAL,
-                    },
-                    {
-                      label: 'Proveedor',
-                      value: TypeTenantEnum.SUPPLIER,
-                    },
-                  ]"
-                  emit-value
-                  map-options
-                  label="Tipo de Usuario"
-                  :rules="[isRequired]"
-                />
-              </div>
-
-              <div class="col-xs-12 col-sm-6">
-                <SelectAutoComplete
-                  outlined
-                  clearable
-                  :model-value="userDto.resourceId"
-                  :label="'Donde Trabaja'"
-                  :options="
-                    userDto.typeTenant === TypeTenantEnum.SUPPLIER || type === TypeTenantEnum.VITAL
-                      ? manufacturers
-                      : erpClients
-                  "
-                  @selection="
-                    userDto.resourceId =
-                      typeof $event.value === 'number'
-                        ? $event.value
-                        : isNaN(Number($event.value))
-                          ? undefined
-                          : Number($event.value)
-                  "
-                  :rules="[isRequired]"
-                >
-                </SelectAutoComplete>
-              </div>
-
-              <div class="col-xs-12 col-sm-6">
-                <q-select
-                  outlined
-                  v-model="userDto.profileId"
-                  :options="profilesByTenant"
-                  emit-value
-                  map-options
-                  label="Perfil"
-                  :rules="[isRequired]"
-                />
-              </div>
-
-              <div class="col-12">
                 <div class="text-weight-light text-blue-grey-5">Información de acceso</div>
               </div>
 
               <div class="col-xs-12 col-sm-6">
                 <q-input
                   outlined
-                  v-model="userDto.firstName"
+                  v-model="createUserDto.name"
                   label="Nombre"
                   :rules="[isRequired]"
                 />
@@ -172,7 +78,7 @@ onBeforeUnmount(() => {
               <div class="col-xs-12 col-sm-6">
                 <q-input
                   outlined
-                  v-model="userDto.lastName"
+                  v-model="createUserDto.lastName"
                   label="Apellido"
                   :rules="[isRequired]"
                 />
@@ -181,7 +87,7 @@ onBeforeUnmount(() => {
               <div class="col-xs-12 col-sm-6">
                 <q-input
                   outlined
-                  v-model="userDto.email"
+                  v-model="createUserDto.email"
                   label="Correo Electrónico"
                   :rules="[isRequired]"
                 />
@@ -190,7 +96,7 @@ onBeforeUnmount(() => {
               <div class="col-xs-12 col-sm-6">
                 <q-input
                   outlined
-                  v-model="userDto.password"
+                  v-model="createUserDto.password"
                   label="Contraseña"
                   :type="isPwd ? 'password' : 'text'"
                   :rules="[isRequired, isPassword]"
@@ -205,44 +111,14 @@ onBeforeUnmount(() => {
                 </q-input>
               </div>
 
-              <div
-                class="col-12"
-                v-if="[TypeTenantEnum.SUPPLIER].includes(userDto.typeTenant as TypeTenantEnum)"
-              >
-                <div class="text-weight-light text-blue-grey-5">Conexión con ERP</div>
-              </div>
-
-              <div class="col-xs-12" v-if="userDto.typeTenant === TypeTenantEnum.SUPPLIER">
-                <SelectAutoComplete
+              <div class="col-xs-12 col-sm-6">
+                <q-select
                   outlined
-                  clearable
-                  :model-value="userDto.userErpCode"
-                  :label="'Usuario de ERP'"
-                  :options="erpSalespeople"
-                  @selection="userDto.userErpCode = $event.value.toString()"
-                  :rules="[isRequired]"
-                >
-                </SelectAutoComplete>
-              </div>
-
-              <div
-                class="col-xs-12 row"
-                v-if="
-                  userCreatedResponse &&
-                  (userCreatedResponse.user.profileId === UserProfileId.COLLECTIONS_ANALYST ||
-                    userCreatedResponse.user.profileId === UserProfileId.COLLECTIONS_MANAGER ||
-                    userCreatedResponse.user.profileId === UserProfileId.CUSTOMER ||
-                    userCreatedResponse.user.profileId === UserProfileId.TELEOPERATOR_AGENT ||
-                    userCreatedResponse.user.profileId === UserProfileId.TEST_CUSTOMER)
-                "
-              >
-                <q-btn
-                  class="col-12"
-                  unelevated
-                  color="primary"
-                  outline
-                  label="Definir Farmacias"
-                  @click="openDefineCustomersDialog"
+                  v-model="createUserDto.profileId"
+                  :options="profiles"
+                  emit-value
+                  map-options
+                  label="Perfil"
                 />
               </div>
 

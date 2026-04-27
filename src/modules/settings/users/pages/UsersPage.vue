@@ -1,17 +1,44 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { QTable } from 'quasar';
+import { ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
-// import DialogUserForm from '../../employees/components/DialogUserForm.vue';
 import TitlesComponent from 'src/modules/shared/components/TitlesComponent.vue';
-import { useUserQuery } from '../composables/useUserQuery';
-import type { UserItem } from '../interfaces/userInterface';
+import { useUsersQuery } from '../composables/useUsersQuery';
+import type { UserItem, UserSearchParams } from '../interfaces/userInterface';
 import { UsersRoutesEnum } from '../router';
 
 const router = useRouter();
-const filter = ref<string>('');
-const { users, userQuery, columnTable, refreshQuery } = useUserQuery();
+const search = ref<string>('');
+const { users, usersQuery, columnTable, refreshQuery, searchParams, totalUsers } = useUsersQuery();
+
+const pagination = ref({
+  page: searchParams.value.page ?? 1,
+  rowsPerPage: searchParams.value.limit ?? 10,
+  rowsNumber: totalUsers.value,
+});
+
+watch(totalUsers, (val) => {
+  pagination.value.rowsNumber = val;
+});
+
+const onRequest = (props: { pagination: { page: number; rowsPerPage: number } }) => {
+  const { page, rowsPerPage } = props.pagination;
+  searchParams.value = { ...searchParams.value, page, limit: rowsPerPage };
+  pagination.value.page = page;
+  pagination.value.rowsPerPage = rowsPerPage;
+};
+
+const onSearch = (val: string | number | null) => {
+  const searchVal = typeof val === 'string' && val.length > 0 ? val : undefined;
+  const newParams: UserSearchParams = { ...searchParams.value, page: 1 };
+  if (searchVal !== undefined) {
+    newParams.search = searchVal;
+  } else {
+    delete newParams.search;
+  }
+  searchParams.value = newParams;
+  pagination.value.page = 1;
+};
 
 const goToUserAdd = async () => {
   await router.push({ name: UsersRoutesEnum.ADD_USER });
@@ -39,14 +66,24 @@ const goToUserEdit = async (user: UserItem) => {
         row-key="id"
         :rows="users"
         :columns="columnTable"
-        :loading="userQuery.isFetching.value"
+        :loading="usersQuery.isFetching.value"
         :rows-per-page-options="[10, 15, 20, 50]"
-        :pagination="{ rowsPerPage: 10 }"
-        :filter="filter"
+        v-model:pagination="pagination"
+        :rows-number="totalUsers"
+        server-side
+        @request="onRequest"
         class="q-mt-md shadow-1"
       >
         <template v-slot:top-left>
-          <q-input dense debounce="400" outlined clearable v-model="filter" placeholder="Buscar">
+          <q-input
+            dense
+            debounce="400"
+            outlined
+            clearable
+            v-model="search"
+            placeholder="Buscar"
+            @update:model-value="onSearch"
+          >
             <template v-slot:append>
               <q-icon name="sym_r_search" />
             </template>

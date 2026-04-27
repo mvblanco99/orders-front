@@ -14,6 +14,7 @@ const useDropDown = (resource: ResourceDD) => {
     users,
     clients,
     manufacturers,
+    products,
     salespeople,
     tenants,
     menuItemsDropDown,
@@ -22,16 +23,16 @@ const useDropDown = (resource: ResourceDD) => {
     erpSalespeople,
     profiles,
     profilesByTenant,
-    collectionAnalyst,
     teleoperator,
+    collectionAnalyst,
     triangulator,
-    products,
     customerGroups,
     orderSubStatus,
     advertisingSpaces,
+    keysCommercial,
     paymentMethods,
     banks,
-    keysCommercial,
+    zones,
   } = storeToRefs(store);
 
   const queryDropDown = useQuery({
@@ -118,6 +119,9 @@ const useDropDown = (resource: ResourceDD) => {
         case 'banks':
           banks.value = newVal;
           break;
+        case 'zones':
+          zones.value = newVal;
+          break;
         default:
         case 'keys-commercial':
           keysCommercial.value = newVal;
@@ -154,6 +158,7 @@ const useDropDown = (resource: ResourceDD) => {
     keysCommercial,
     paymentMethods,
     banks,
+    zones,
   };
 };
 

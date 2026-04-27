@@ -1,39 +1,51 @@
-enum TypeTenantEnum {
-  VITAL = 'VITAL',
-  SUPPLIER = 'SUPPLIER',
-  CLIENT = 'CLIENT',
-}
-
 export interface CreateUserDto {
-  typeTenant: TypeTenantEnum | '';
-  resourceId: number | undefined;
-  profileId: number | undefined;
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string | undefined;
-  userErpCode: string | undefined;
-}
-
-export interface AddUserResponse {
-  id: number;
-  email: string;
-  phone: null;
-  userId: number;
-  createdAt: Date;
-  updatedAt: Date;
-  user: User;
-}
-
-export interface User {
-  id: number;
   email: string;
   password: string;
+  name?: string;
+  lastName?: string;
+  profileId?: number;
+}
+
+export interface UpdateUserDto {
+  email?: string;
+  password?: string;
+  name?: string;
+  lastName?: string;
+  profileId?: number;
+}
+
+export interface CreatedUser {
+  email: string;
   name: string;
+  lastName: string;
+  id: number;
+  slug: string;
   isActive: boolean;
   isDeleted: boolean;
   createdAt: Date;
   updatedAt: Date;
   profileId: number;
-  tenantId: number;
+}
+
+export interface UpdatedUser {
+  id: number;
+  email: string;
+  name: string;
+  lastName: string;
+  isActive: boolean;
+  isDeleted: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  profileId: number;
+  slug: string;
+}
+
+export interface CreateUserResponse {
+  message: string;
+  user: CreatedUser;
+}
+
+export interface UpdateUserResponse {
+  message: string;
+  user: UpdatedUser;
 }

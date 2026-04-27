@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import type { QTableColumn } from 'quasar';
 import { useOrders } from '../composables/useOrders';
-import OrderPartsTable from '../components/OrderPartsTable.vue';
 import { OrderStatus } from '../interfaces/order.interface';
 
 const route = useRoute();
@@ -29,23 +29,46 @@ const goToEdit = () => {
   void router.push({ name: 'order-edit', params: { id: orderId } });
 };
 
-const getStatusColor = (status: string) => {
-  const colors: Record<string, string> = {
-    [OrderStatus.PENDING]: 'warning',
-    [OrderStatus.PROCESSING]: 'info',
-    [OrderStatus.COMPLETED]: 'positive',
-  };
-  return colors[status] || 'grey';
+const statusColorMap: Record<string, string> = {
+  [OrderStatus.PENDING]: 'warning',
+  [OrderStatus.PROCESSING]: 'info',
+  [OrderStatus.COMPLETED]: 'positive',
+  [OrderStatus.CANCELLED]: 'negative',
 };
 
-const getStatusLabel = (status: string) => {
-  const labels: Record<string, string> = {
-    [OrderStatus.PENDING]: 'Pendiente',
-    [OrderStatus.PROCESSING]: 'En proceso',
-    [OrderStatus.COMPLETED]: 'Completada',
-  };
-  return labels[status] || status;
+const statusLabelMap: Record<string, string> = {
+  [OrderStatus.PENDING]: 'Pendiente',
+  [OrderStatus.PROCESSING]: 'En proceso',
+  [OrderStatus.COMPLETED]: 'Completada',
+  [OrderStatus.CANCELLED]: 'Cancelada',
 };
+
+const getStatusColor = (status: string) => statusColorMap[status] ?? 'grey';
+const getStatusLabel = (status: string) => statusLabelMap[status] ?? status;
+
+const formatUser = (user: { name: string; lastName: string } | null) =>
+  user ? `${user.name} ${user.lastName}` : 'Sin asignar';
+
+const detailColumns: QTableColumn[] = [
+  { name: 'partId', label: 'Parte #', field: 'partId', align: 'center', sortable: true },
+  { name: 'quantity', label: 'Cantidad', field: 'quantity', align: 'center', sortable: true },
+  { name: 'picker', label: 'Picker', field: 'picker', align: 'left' },
+  { name: 'packer', label: 'Packer', field: 'packer', align: 'left' },
+  { name: 'rechecker', label: 'Rechecker', field: 'rechecker', align: 'left' },
+];
+
+const detailRows = computed(() => {
+  if (!orderDetail.value?.OrderDetails) return [];
+  return orderDetail.value.OrderDetails.flatMap((detail) =>
+    detail.Parts.map((part) => ({
+      partId: detail.partId,
+      quantity: detail.quantity,
+      picker: formatUser(part.Picker),
+      packer: formatUser(part.Packer),
+      rechecker: formatUser(part.Rechecker),
+    })),
+  );
+});
 </script>
 
 <template>
@@ -63,8 +86,8 @@ const getStatusLabel = (status: string) => {
           dense
           icon="sym_r_arrow_back"
           color="grey-7"
-          @click="goBack"
           class="q-mr-md"
+          @click="goBack"
         />
         <div>
           <h1 class="text-h4 text-weight-semi-bold q-ma-none">
@@ -76,7 +99,7 @@ const getStatusLabel = (status: string) => {
         <q-btn unelevated color="primary" icon="sym_r_edit" label="Editar" @click="goToEdit" />
       </div>
 
-      <!-- Información básica -->
+      <!-- Información general -->
       <q-card flat bordered class="q-mb-md">
         <q-card-section>
           <div class="text-h6 text-weight-semi-bold q-mb-md">Información general</div>
@@ -89,7 +112,9 @@ const getStatusLabel = (status: string) => {
 
             <div class="col-12 col-sm-6 col-md-3">
               <div class="text-caption text-grey-600">Zona</div>
-              <div class="text-body1 text-weight-medium">Zona ID: {{ orderDetail.zoneId }}</div>
+              <div class="text-body1 text-weight-medium">
+                {{ orderDetail.Zone?.name ?? `Zona ${orderDetail.zoneId}` }}
+              </div>
             </div>
 
             <div class="col-12 col-sm-6 col-md-3">
@@ -119,25 +144,33 @@ const getStatusLabel = (status: string) => {
 
             <div class="col-12 col-sm-6 col-md-3">
               <div class="text-caption text-grey-600">Creado por</div>
-              <div class="text-body1 text-weight-medium">User ID: {{ orderDetail.createdBy }}</div>
-            </div>
-
-            <div class="col-12 col-sm-6 col-md-3">
-              <div class="text-caption text-grey-600">Estado</div>
-              <q-chip
-                :color="orderDetail.isActive ? 'positive' : 'negative'"
-                text-color="white"
-                size="sm"
-              >
-                {{ orderDetail.isActive ? 'Activa' : 'Inactiva' }}
-              </q-chip>
+              <div class="text-body1 text-weight-medium">
+                {{
+                  orderDetail.User
+                    ? `${orderDetail.User.name} ${orderDetail.User.lastName}`
+                    : `ID: ${orderDetail.createdBy}`
+                }}
+              </div>
             </div>
           </div>
         </q-card-section>
       </q-card>
 
       <!-- Partes de la orden -->
-      <OrderPartsTable :parts="orderDetail.OrderPart" :loading="loading" />
+      <q-card flat bordered>
+        <q-card-section>
+          <div class="text-h6 text-weight-semi-bold q-mb-md">Partes de la orden</div>
+          <q-table
+            flat
+            :rows="detailRows"
+            :columns="detailColumns"
+            row-key="partId"
+            :loading="loading"
+            hide-bottom
+            no-data-label="Sin partes registradas"
+          />
+        </q-card-section>
+      </q-card>
     </div>
 
     <div v-else class="flex flex-center" style="min-height: 400px">

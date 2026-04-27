@@ -1,47 +1,69 @@
 import { ref } from 'vue';
 import { defineStore } from 'pinia';
-import type { UserDetail, UserItem } from '../interfaces/userInterface';
-import type { CreateUserDto } from '../interfaces/CreateUserDto';
+import type { UserItem, UserDetail, UserSearchParams } from '../interfaces/userInterface';
+import type { CreateUserDto, UpdateUserDto } from '../interfaces/CreateUserDto';
 
-const initStateDto: CreateUserDto = {
-  typeTenant: '',
-  resourceId: undefined,
-  profileId: undefined,
-  firstName: '',
-  lastName: '',
+const initialCreateUserDto: CreateUserDto = {
   email: '',
   password: '',
-  userErpCode: undefined,
 };
 
-export const useUserStore = defineStore('discountsheaderSupplierStore', () => {
-  const users = ref<UserItem[]>([]);
-  const userDto = ref<CreateUserDto>(structuredClone(initStateDto));
-  const userDetail = ref<UserDetail | null>(null);
+const initialSearchParams: UserSearchParams = {
+  page: 1,
+  limit: 10,
+};
 
+export const useUserStore = defineStore('usersStore', () => {
+  // State
+  const users = ref<UserItem[]>([]);
+  const userDetail = ref<UserDetail | null>(null);
+  const createUserDto = ref<CreateUserDto>(structuredClone(initialCreateUserDto));
+  const updateUserDto = ref<UpdateUserDto>({});
+  const searchParams = ref<UserSearchParams>(structuredClone(initialSearchParams));
+  const totalUsers = ref<number>(0);
+  const currentPage = ref<number>(1);
+  const totalPages = ref<number>(1);
+
+  // Actions
   const resetUsers = () => {
     users.value = [];
-    localStorage.removeItem('menuItems');
+    totalUsers.value = 0;
+    currentPage.value = 1;
+    totalPages.value = 1;
   };
 
   const resetUserDetail = () => {
     userDetail.value = null;
-    localStorage.removeItem('userDetail');
   };
 
-  const resetUserDto = () => {
-    userDto.value = structuredClone(initStateDto);
+  const resetCreateUserDto = () => {
+    createUserDto.value = structuredClone(initialCreateUserDto);
+  };
+
+  const resetUpdateUserDto = () => {
+    updateUserDto.value = {};
+  };
+
+  const resetSearchParams = () => {
+    searchParams.value = structuredClone(initialSearchParams);
   };
 
   return {
     // State
     users,
-    userDto,
     userDetail,
+    createUserDto,
+    updateUserDto,
+    searchParams,
+    totalUsers,
+    currentPage,
+    totalPages,
 
     // Actions
     resetUsers,
     resetUserDetail,
-    resetUserDto,
+    resetCreateUserDto,
+    resetUpdateUserDto,
+    resetSearchParams,
   };
 });

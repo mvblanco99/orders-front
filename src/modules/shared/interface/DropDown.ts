@@ -29,7 +29,8 @@ export type ResourceDD =
   | 'payment-methods'
   | 'banks'
   | 'keys-commercial'
-  | 'payment_methods';
+  | 'payment_methods'
+  | 'zones';
 
 export type ResourceDDById =
   | 'assets-by-warehouse'

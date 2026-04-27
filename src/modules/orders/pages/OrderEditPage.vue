@@ -6,7 +6,7 @@ import { useOrderStore } from '../stores/useOrderStore';
 import { useOrders } from '../composables/useOrders';
 import { useOrderValidation } from '../composables/useOrderValidation';
 import OrderPartsTable from '../components/OrderPartsTable.vue';
-import type { CreateOrderPartDto, UpdateOrderPartDto } from '../interfaces/order.dto';
+import type { CreateOrderDetailDto, UpdateOrderPartDto } from '../interfaces/order.dto';
 import type { OrderPart } from '../interfaces/order.interface';
 
 const route = useRoute();
@@ -21,8 +21,8 @@ const orderId = Number(route.params.id);
 
 const partDialogVisible = ref(false);
 const editingPart = ref<OrderPart | null>(null);
-const currentPart = ref<Partial<CreateOrderPartDto>>({
-  partNumber: 0,
+const currentPart = ref<Partial<CreateOrderDetailDto>>({
+  partId: 0,
   quantity: 0,
   pickerId: 0,
 });
@@ -45,17 +45,17 @@ const openPartDialog = (part?: OrderPart) => {
   if (part) {
     editingPart.value = part;
     currentPart.value = {
-      partNumber: part.partNumber,
+      partId: part.partNumber,
       quantity: part.quantity,
       pickerId: part.pickerId,
     };
   } else {
     editingPart.value = null;
     const maxPartNumber = Math.max(
-      ...(orderDetail.value?.OrderPart.map((p) => p.partNumber) || [0]),
+      ...(orderDetail.value?.OrderPart?.map((p) => p.partNumber) || [0]),
     );
     currentPart.value = {
-      partNumber: maxPartNumber + 1,
+      partId: maxPartNumber + 1,
       quantity: 0,
       pickerId: 0,
     };
@@ -71,7 +71,7 @@ const savePart = () => {
     }
     updateOrderDto.value.partsToUpdate.push({
       id: editingPart.value.id,
-      partNumber: currentPart.value.partNumber,
+      partNumber: currentPart.value.partId,
       quantity: currentPart.value.quantity,
       pickerId: currentPart.value.pickerId,
     } as UpdateOrderPartDto);
@@ -80,7 +80,7 @@ const savePart = () => {
     if (!updateOrderDto.value.partsToCreate) {
       updateOrderDto.value.partsToCreate = [];
     }
-    updateOrderDto.value.partsToCreate.push(currentPart.value as CreateOrderPartDto);
+    updateOrderDto.value.partsToCreate.push(currentPart.value as CreateOrderDetailDto);
   }
 
   partDialogVisible.value = false;
@@ -194,7 +194,7 @@ const handleCancel = () => {
           </div>
 
           <OrderPartsTable
-            :parts="orderDetail.OrderPart"
+            :parts="orderDetail.OrderPart || []"
             :loading="loading"
             editable
             @edit="openPartDialog"
@@ -228,7 +228,7 @@ const handleCancel = () => {
 
         <q-card-section class="q-pt-none">
           <q-input
-            v-model.number="currentPart.partNumber"
+            v-model.number="currentPart.partId"
             label="Número de parte"
             outlined
             dense

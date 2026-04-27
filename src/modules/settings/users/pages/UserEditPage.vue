@@ -1,28 +1,22 @@
 <script setup lang="ts">
 import { onBeforeUnmount, ref, watch } from 'vue';
-import { Dialog, QForm } from 'quasar';
+import { QForm } from 'quasar';
 import { useRoute, useRouter } from 'vue-router';
 import useValidators from 'src/modules/shared/composables/useValidators';
-import useDropDownByType from 'src/modules/shared/composables/useDropDownsByType';
 import useDropDown from 'src/modules/shared/composables/useDropDowns';
-import useDataUserQuery from '../composables/useDataUserQuery';
-import DefineCustomersDialog from '../components/DefineCustomersDialog.vue';
-import { TypeTenantEnum, UserProfileId } from '../interfaces/userInterface';
 import HorizontalConfigCard from '../components/HorizontalConfigCard.vue';
+import useDataUserQuery from '../composables/useDataUserQuery';
 import useUpdateUserMutation from '../composables/useUpdateUserMutation';
+import type { UpdateUserDto } from '../interfaces/CreateUserDto';
 import { UsersRoutesEnum } from '../router';
 
 const route = useRoute();
 const userId = route.params.id as string;
 const { userDetail } = useDataUserQuery(Number(userId));
 
-const { manufacturers } = useDropDown('manufacturers');
-const { erpClients } = useDropDown('erp_clients');
-const { erpSalespeople } = useDropDown('erp_salespeople');
-const { profilesByTenant, type } = useDropDownByType('profiles-by-tenant');
-
+const { profiles } = useDropDown('profiles');
 const { isRequired, isPassword } = useValidators();
-const { userDto, updateUserMutation, resetDto } = useUpdateUserMutation();
+const { updateUserDto, updateUserMutation, resetDto } = useUpdateUserMutation();
 
 const router = useRouter();
 
@@ -35,70 +29,32 @@ const isPwd = ref(true);
 
 const onSubmit = async () => {
   if (!(await myForm.value?.validate())) return;
-  await updateUserMutation.mutateAsync({
-    id: Number(userId),
-    payload: {
-      firstName: userDto.value.firstName,
-      lastName: userDto.value.lastName,
-      email: userDto.value.email,
-      password: userDto.value.password ? userDto.value.password : undefined,
-      profileId:
-        userDto.value.profileId !== userDetail.value?.profileId
-          ? userDto.value.profileId
-          : undefined,
-      userErpCode: userDto.value.userErpCode,
-    },
-  });
+  const payload: UpdateUserDto = {};
+  const dto = updateUserDto.value;
+  const detail = userDetail.value;
+  if (dto.name !== undefined && dto.name !== detail?.name) payload.name = dto.name;
+  if (dto.lastName !== undefined && dto.lastName !== detail?.lastName)
+    payload.lastName = dto.lastName;
+  if (dto.email !== undefined && dto.email !== detail?.email) payload.email = dto.email;
+  if (dto.profileId !== undefined && dto.profileId !== detail?.Profile?.id)
+    payload.profileId = dto.profileId;
+  if (dto.password) payload.password = dto.password;
+  await updateUserMutation.mutateAsync({ id: Number(userId), payload });
 };
-
-const openDefineCustomersDialog = () => {
-  Dialog.create({
-    component: DefineCustomersDialog,
-    componentProps: {
-      userId:
-        userDetail.value?.tenantType === 'CLIENT'
-          ? userDetail.value.id
-          : userDetail.value?.relationId,
-      name: `${userDetail.value?.firstName} ${userDetail.value?.lastName}`,
-      profile: userDetail.value?.profileId,
-    },
-  });
-};
-
-watch(
-  userDto,
-  (newVal) => {
-    if (!newVal) return;
-    type.value = userDto.value.typeTenant;
-  },
-  {
-    deep: true,
-  },
-);
 
 watch(
   userDetail,
   (newVal) => {
     if (!newVal) return;
-
-    userDto.value.typeTenant = newVal.tenantType as TypeTenantEnum;
-    userDto.value.resourceId = newVal.tenantResourceId;
-    userDto.value.profileId = newVal.profileId;
-    userDto.value.email = newVal.email;
-    userDto.value.firstName = newVal.firstName;
-    userDto.value.lastName = newVal.lastName;
-    userDto.value.userErpCode = newVal.erp_salespeopleId as string;
+    updateUserDto.value = {
+      name: newVal.name,
+      lastName: newVal.lastName,
+      email: newVal.email,
+      profileId: newVal.Profile?.id,
+    };
   },
-  {
-    deep: true,
-    immediate: true,
-  },
+  { deep: true, immediate: true },
 );
-
-const passwordRule = (val: string) => {
-  if (!val || val.length === 0) return false; // Allow empty password (not required on edit)
-  return true;
-};
 
 onBeforeUnmount(() => {
   resetDto();
@@ -122,7 +78,7 @@ onBeforeUnmount(() => {
       </div>
       <h2 class="q-my-none">Editar usuario</h2>
     </div>
-    <p class="text-blue-grey-5">Edite un usuario nuevo para su aplicación.</p>
+    <p class="text-blue-grey-5">Edite la información del usuario.</p>
 
     <q-form ref="myForm" @submit="onSubmit">
       <div class="shadow-card rounded-borders">
@@ -130,71 +86,12 @@ onBeforeUnmount(() => {
           <template v-slot:left>
             <div class="text-h6">Datos básicos</div>
             <div class="text-weight-light text-blue-grey-5">
-              Indique la información básica del usuario que desea crear.
+              Indique la información básica del usuario que desea editar.
             </div>
           </template>
 
           <template v-slot:right>
             <div class="row q-col-gutter-md">
-              <div class="col-12">
-                <div class="text-weight-light text-blue-grey-5">Tipo</div>
-              </div>
-
-              <div class="col-xs-12 col-sm-12">
-                <q-select
-                  outlined
-                  v-model="userDto.typeTenant"
-                  :options="[
-                    {
-                      label: 'Cliente',
-                      value: TypeTenantEnum.CLIENT,
-                    },
-                    {
-                      label: 'Vital',
-                      value: TypeTenantEnum.VITAL,
-                    },
-                    {
-                      label: 'Proveedor',
-                      value: TypeTenantEnum.SUPPLIER,
-                    },
-                  ]"
-                  emit-value
-                  map-options
-                  label="Tipo de Usuario"
-                  :rules="[isRequired]"
-                  :disable="true"
-                />
-              </div>
-
-              <div class="col-xs-12 col-sm-6">
-                <q-select
-                  outlined
-                  v-model="userDto.resourceId"
-                  :options="
-                    userDto.typeTenant === TypeTenantEnum.SUPPLIER || type === TypeTenantEnum.VITAL
-                      ? manufacturers
-                      : erpClients
-                  "
-                  emit-value
-                  map-options
-                  label="Donde Trabaja"
-                  :rules="[isRequired]"
-                  :disable="true"
-                />
-              </div>
-
-              <div class="col-xs-12 col-sm-6">
-                <q-select
-                  outlined
-                  v-model="userDto.profileId"
-                  :options="profilesByTenant"
-                  emit-value
-                  map-options
-                  label="Perfil"
-                  :rules="[isRequired]"
-                />
-              </div>
-
               <div class="col-12">
                 <div class="text-weight-light text-blue-grey-5">Información de acceso</div>
               </div>
@@ -202,7 +99,7 @@ onBeforeUnmount(() => {
               <div class="col-xs-12 col-sm-6">
                 <q-input
                   outlined
-                  v-model="userDto.firstName"
+                  v-model="updateUserDto.name"
                   label="Nombre"
                   :rules="[isRequired]"
                 />
@@ -211,7 +108,7 @@ onBeforeUnmount(() => {
               <div class="col-xs-12 col-sm-6">
                 <q-input
                   outlined
-                  v-model="userDto.lastName"
+                  v-model="updateUserDto.lastName"
                   label="Apellido"
                   :rules="[isRequired]"
                 />
@@ -220,7 +117,7 @@ onBeforeUnmount(() => {
               <div class="col-xs-12 col-sm-6">
                 <q-input
                   outlined
-                  v-model="userDto.email"
+                  v-model="updateUserDto.email"
                   label="Correo Electrónico"
                   :rules="[isRequired]"
                 />
@@ -229,10 +126,10 @@ onBeforeUnmount(() => {
               <div class="col-xs-12 col-sm-6">
                 <q-input
                   outlined
-                  v-model="userDto.password"
-                  label="Contraseña"
+                  v-model="updateUserDto.password"
+                  label="Contraseña (opcional)"
                   :type="isPwd ? 'password' : 'text'"
-                  :rules="passwordRule(userDto.password!) ? [isPassword] : []"
+                  :rules="updateUserDto.password ? [isPassword] : []"
                 >
                   <template v-slot:append>
                     <q-icon
@@ -244,43 +141,14 @@ onBeforeUnmount(() => {
                 </q-input>
               </div>
 
-              <div
-                class="col-12"
-                v-if="[TypeTenantEnum.SUPPLIER].includes(userDto.typeTenant as TypeTenantEnum)"
-              >
-                <div class="text-weight-light text-blue-grey-5">Conexión con ERP</div>
-              </div>
-
-              <div class="col-xs-12" v-if="userDto.typeTenant === TypeTenantEnum.SUPPLIER">
+              <div class="col-xs-12 col-sm-6">
                 <q-select
                   outlined
-                  v-model="userDto.userErpCode"
-                  :options="erpSalespeople"
+                  v-model="updateUserDto.profileId"
+                  :options="profiles"
                   emit-value
                   map-options
-                  label="Usuario de ERP"
-                  :rules="[isRequired]"
-                />
-              </div>
-
-              <div
-                class="col-xs-12 row"
-                v-if="
-                  userDetail &&
-                  (userDetail.profileId === UserProfileId.COLLECTIONS_ANALYST ||
-                    userDetail.profileId === UserProfileId.COLLECTIONS_MANAGER ||
-                    userDetail.profileId === UserProfileId.CUSTOMER ||
-                    userDetail.profileId === UserProfileId.TELEOPERATOR_AGENT ||
-                    userDetail.profileId === UserProfileId.TEST_CUSTOMER)
-                "
-              >
-                <q-btn
-                  class="col-12"
-                  unelevated
-                  color="primary"
-                  outline
-                  label="Definir Farmacias"
-                  @click="openDefineCustomersDialog"
+                  label="Perfil"
                 />
               </div>
 

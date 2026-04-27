@@ -27,6 +27,7 @@ export const useDropDownStore = defineStore('DropDown', () => {
     paymentMethods: ref<DropDown[]>([]),
     banks: ref<DropDown[]>([]),
     keysCommercial: ref<DropDown[]>([]),
+    zones: ref<DropDown[]>([]),
 
     // By Id
     clientsForTeleOperator: ref<DropDown[]>([]),

@@ -5,9 +5,7 @@ import type { QTableProps } from 'quasar';
 
 const initStateDto: ZoneDto = {
   id: undefined,
-  code: '',
   name: '',
-  description: '',
   isActive: true,
 };
 

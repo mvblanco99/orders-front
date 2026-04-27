@@ -1,3 +1,10 @@
+// Usuario embebido en respuestas
+export interface OrderUser {
+  id: number;
+  name: string;
+  lastName: string;
+}
+
 // Entidad principal Order
 export interface Order {
   id: number;
@@ -9,12 +16,44 @@ export interface Order {
   createdBy: number;
   status: OrderStatus;
   isActive: boolean;
+  isDeleted?: boolean;
   createdAt?: string;
   updatedAt?: string;
-  OrderPart: OrderPart[];
+  Zone?: { id: number; name: string };
+  User?: OrderUser;
+  OrderDetails?: OrderDetail[];
+  OrderPart?: OrderPart[]; // kept for backward compat
 }
 
-// Parte de una orden (hoja)
+// Detalle de orden (backend real)
+export interface OrderDetailPart {
+  id: number;
+  orderDetailId: number;
+  pickerId: number | null;
+  packerId: number | null;
+  recheckerId: number | null;
+  isActive: boolean;
+  isDeleted: boolean;
+  createdAt: string;
+  updatedAt: string;
+  Picker: OrderUser | null;
+  Packer: OrderUser | null;
+  Rechecker: OrderUser | null;
+}
+
+export interface OrderDetail {
+  id: number;
+  orderId: number;
+  partId: number;
+  quantity: number;
+  isActive: boolean;
+  isDeleted: boolean;
+  createdAt: string;
+  updatedAt: string;
+  Parts: OrderDetailPart[];
+}
+
+// Parte de una orden (legacy)
 export interface OrderPart {
   id: number;
   orderId: number;
@@ -32,6 +71,7 @@ export enum OrderStatus {
   PENDING = 'pending',
   PROCESSING = 'processing',
   COMPLETED = 'completed',
+  CANCELLED = 'cancelled',
 }
 
 // Response de lista de órdenes

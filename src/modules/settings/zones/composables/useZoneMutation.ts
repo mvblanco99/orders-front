@@ -13,6 +13,7 @@ export const useZoneMutation = () => {
     mutationFn: createZone,
     onSuccess: () => {
       invalidQuery({ queryKey: ['zones'], exact: false });
+      invalidQuery({ queryKey: ['dd-zones'] });
       resetZoneDto();
     },
   });
@@ -21,6 +22,7 @@ export const useZoneMutation = () => {
     mutationFn: updateZone,
     onSuccess: () => {
       invalidQuery({ queryKey: ['zones'], exact: false });
+      invalidQuery({ queryKey: ['dd-zones'] });
       resetZoneDto();
     },
   });
@@ -28,9 +30,7 @@ export const useZoneMutation = () => {
   const fillZoneDto = (zone: ZoneItem) => {
     zoneDto.value = {
       id: zone.id,
-      code: zone.code,
       name: zone.name,
-      description: zone.description,
       isActive: zone.isActive,
     };
   };

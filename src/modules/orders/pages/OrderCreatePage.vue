@@ -1,23 +1,24 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
-import { storeToRefs } from 'pinia';
 import { useOrderStore } from '../stores/useOrderStore';
-import { useOrders } from '../composables/useOrders';
 import { useOrderValidation } from '../composables/useOrderValidation';
-import type { CreateOrderPartDto } from '../interfaces/order.dto';
+import type { CreateOrderDetailDto } from '../interfaces/order.dto';
+import useDropDown from 'src/modules/shared/composables/useDropDowns';
+import { useCreateOrderMutation } from '../composables/useCreateOrderMutation';
 
 const router = useRouter();
 const orderStore = useOrderStore();
-const { createOrder } = useOrders();
+const { createOrderDto, createOrderMutation } = useCreateOrderMutation();
+const { zones: zoneOptions } = useDropDown('zones');
+const { users: pickerOptions } = useDropDown('users');
 const { validateCreateOrder, validatePart, calculateDistribution } = useOrderValidation();
 
-const { createOrderDto } = storeToRefs(orderStore);
 const step = ref(1);
 const partDialogVisible = ref(false);
 const editingPartIndex = ref<number | null>(null);
-const currentPart = ref<CreateOrderPartDto>({
-  partNumber: 0,
+const currentPart = ref<CreateOrderDetailDto>({
+  partId: 0,
   quantity: 0,
   pickerId: 0,
 });
@@ -26,6 +27,7 @@ const currentPart = ref<CreateOrderPartDto>({
 const canProceedStep1 = computed(() => {
   return (
     createOrderDto.value.orderNumber &&
+    createOrderDto.value.zoneId &&
     createOrderDto.value.zoneId > 0 &&
     createOrderDto.value.totalUnits > 0 &&
     createOrderDto.value.totalParts > 0
@@ -42,7 +44,7 @@ const goToStep2 = () => {
   if (!canProceedStep1.value) return;
 
   // Auto-generar partes si no existen
-  if (createOrderDto.value.parts.length === 0) {
+  if (createOrderDto.value.details.length === 0) {
     autoGenerateParts();
   }
 
@@ -55,26 +57,26 @@ const autoGenerateParts = () => {
     createOrderDto.value.totalParts,
   );
 
-  createOrderDto.value.parts = distribution.map((quantity, index) => ({
-    partNumber: index + 1,
+  createOrderDto.value.details = distribution.map((quantity, index) => ({
+    partId: index + 1,
     quantity,
     pickerId: 0,
   }));
 };
 
 const openPartDialog = (index?: number) => {
-  if (index !== undefined && createOrderDto.value.parts[index]) {
+  if (index !== undefined && createOrderDto.value.details[index]) {
     editingPartIndex.value = index;
-    const part = createOrderDto.value.parts[index];
+    const part = createOrderDto.value.details[index];
     currentPart.value = {
-      partNumber: part.partNumber || 0,
+      partId: part.partId || 0,
       quantity: part.quantity || 0,
       pickerId: part.pickerId || 0,
     };
   } else {
     editingPartIndex.value = null;
     currentPart.value = {
-      partNumber: createOrderDto.value.parts.length + 1,
+      partId: createOrderDto.value.details.length + 1,
       quantity: 0,
       pickerId: 0,
     };
@@ -89,19 +91,19 @@ const savePart = () => {
   }
 
   if (editingPartIndex.value !== null) {
-    createOrderDto.value.parts[editingPartIndex.value] = { ...currentPart.value };
+    createOrderDto.value.details[editingPartIndex.value] = { ...currentPart.value };
   } else {
-    createOrderDto.value.parts.push({ ...currentPart.value });
+    createOrderDto.value.details.push({ ...currentPart.value });
   }
 
   partDialogVisible.value = false;
 };
 
 const deletePart = (index: number) => {
-  createOrderDto.value.parts.splice(index, 1);
+  createOrderDto.value.details.splice(index, 1);
   // Renumerar partes
-  createOrderDto.value.parts.forEach((part, idx) => {
-    part.partNumber = idx + 1;
+  createOrderDto.value.details.forEach((part, idx) => {
+    part.partId = idx + 1;
   });
 };
 
@@ -113,12 +115,7 @@ const handleSubmit = async () => {
     return;
   }
 
-  try {
-    await createOrder();
-    void router.push({ name: 'order-list' });
-  } catch {
-    // Error handled by composable
-  }
+  await createOrderMutation.mutateAsync();
 };
 
 const handleCancel = () => {
@@ -141,49 +138,43 @@ const handleCancel = () => {
       <q-step :name="1" title="Información básica" icon="sym_r_description" :done="step > 1">
         <q-card flat bordered class="q-pa-md">
           <div class="row q-col-gutter-md">
-            <div class="col-12 col-md-6">
+            <div class="col-xs-12 col-sm-6">
               <q-input
                 v-model="createOrderDto.orderNumber"
                 label="Número de orden *"
                 outlined
-                dense
                 :rules="[(val) => !!val || 'Campo requerido']"
               />
             </div>
 
-            <div class="col-12 col-md-6">
+            <div class="col-xs-12 col-sm-6">
               <q-select
                 v-model="createOrderDto.zoneId"
                 label="Zona *"
                 outlined
-                dense
-                :options="[]"
-                option-value="id"
-                option-label="name"
-                emit-value
+                :options="zoneOptions"
                 map-options
+                emit-value
                 :rules="[(val) => !!val || 'Campo requerido']"
               />
             </div>
 
-            <div class="col-12 col-md-6">
+            <div class="col-xs-12 col-sm-6">
               <q-input
                 v-model.number="createOrderDto.totalUnits"
                 label="Total de unidades *"
                 outlined
-                dense
                 type="number"
                 min="1"
                 :rules="[(val) => val > 0 || 'Debe ser mayor a 0']"
               />
             </div>
 
-            <div class="col-12 col-md-6">
+            <div class="col-xs-12 col-sm-6">
               <q-input
                 v-model.number="createOrderDto.totalParts"
                 label="Total de partes *"
                 outlined
-                dense
                 type="number"
                 min="1"
                 :rules="[(val) => val > 0 || 'Debe ser mayor a 0']"
@@ -227,19 +218,33 @@ const handleCancel = () => {
         </div>
 
         <q-table
-          :rows="createOrderDto.parts"
+          :rows="createOrderDto.details"
           :columns="[
-            { name: 'partNumber', label: 'Parte #', field: 'partNumber', align: 'center' },
+            { name: 'partId', label: 'Parte #', field: 'partId', align: 'center' },
             { name: 'quantity', label: 'Cantidad', field: 'quantity', align: 'center' },
-            { name: 'picker', label: 'Picker ID', field: 'pickerId', align: 'center' },
-            { name: 'actions', label: 'Acciones', field: 'partNumber', align: 'center' },
+            { name: 'picker', label: 'Picker', field: 'pickerId', align: 'center' },
+            { name: 'actions', label: 'Acciones', field: 'partId', align: 'center' },
           ]"
-          row-key="partNumber"
+          row-key="partId"
           no-data-label="No hay partes agregadas. Use 'Auto-generar' o 'Agregar parte'."
           bordered
           flat
           class="shadow-1"
         >
+          <template v-slot:body-cell-picker="props">
+            <q-td :props="props" auto-width>
+              <q-select
+                v-if="createOrderDto.details[props.rowIndex]"
+                v-model="createOrderDto.details[props.rowIndex]!.pickerId"
+                :options="pickerOptions"
+                emit-value
+                map-options
+                outlined
+                dense
+                style="width: 180px"
+              />
+            </q-td>
+          </template>
           <template v-slot:body-cell-actions="props">
             <q-td :props="props">
               <q-btn
@@ -289,7 +294,7 @@ const handleCancel = () => {
 
         <q-card-section class="q-pt-none">
           <q-input
-            v-model.number="currentPart.partNumber"
+            v-model.number="currentPart.partId"
             label="Número de parte"
             outlined
             dense
@@ -311,9 +316,7 @@ const handleCancel = () => {
             label="Picker"
             outlined
             dense
-            :options="[]"
-            option-value="id"
-            option-label="name"
+            :options="pickerOptions"
             emit-value
             map-options
           />

@@ -1,4 +1,4 @@
-import type { CreateOrderDto, CreateOrderPartDto, UpdateOrderDto } from '../interfaces/order.dto';
+import type { CreateOrderDetailDto, CreateOrderDto, UpdateOrderDto } from '../interfaces/order.dto';
 
 /**
  * Validaciones para el frontend antes de enviar al backend
@@ -30,20 +30,20 @@ export const useOrderValidation = () => {
       errors.push('El número de orden es obligatorio');
     }
 
-    // Validar parts
-    if (!dto.parts || dto.parts.length === 0) {
+    // Validar details
+    if (!dto.details || dto.details.length === 0) {
       errors.push('Debe agregar al menos una parte');
     } else {
       // Validar que el número de partes coincida con totalParts
-      if (dto.parts.length !== dto.totalParts) {
+      if (dto.details.length !== dto.totalParts) {
         errors.push(
-          `El número de partes (${dto.parts.length}) no coincide con el total de partes esperado (${dto.totalParts})`,
+          `El número de partes (${dto.details.length}) no coincide con el total de partes esperado (${dto.totalParts})`,
         );
       }
 
       // Validar cada parte
-      dto.parts.forEach((part, index) => {
-        if (!part.partNumber || part.partNumber <= 0) {
+      dto.details.forEach((part, index) => {
+        if (!part.partId || part.partId <= 0) {
           errors.push(`La parte ${index + 1} tiene un número inválido`);
         }
         if (!part.quantity || part.quantity <= 0) {
@@ -55,17 +55,17 @@ export const useOrderValidation = () => {
       });
 
       // Verificar que la suma de cantidades coincida con totalUnits
-      const sumQuantities = dto.parts.reduce((sum, part) => sum + (part.quantity || 0), 0);
+      const sumQuantities = dto.details.reduce((sum, part) => sum + (part.quantity || 0), 0);
       if (sumQuantities !== dto.totalUnits) {
         errors.push(
           `La suma de cantidades de las partes (${sumQuantities}) no coincide con el total de unidades (${dto.totalUnits})`,
         );
       }
 
-      // Verificar que no haya números de parte duplicados
-      const partNumbers = dto.parts.map((p) => p.partNumber);
-      const uniquePartNumbers = new Set(partNumbers);
-      if (partNumbers.length !== uniquePartNumbers.size) {
+      // Verificar que no haya partIds duplicados
+      const partIds = dto.details.map((p) => p.partId);
+      const uniquePartIds = new Set(partIds);
+      if (partIds.length !== uniquePartIds.size) {
         errors.push('Hay números de parte duplicados');
       }
     }
@@ -79,10 +79,10 @@ export const useOrderValidation = () => {
   /**
    * Validar parte individual
    */
-  const validatePart = (part: CreateOrderPartDto): { valid: boolean; errors: string[] } => {
+  const validatePart = (part: CreateOrderDetailDto): { valid: boolean; errors: string[] } => {
     const errors: string[] = [];
 
-    if (!part.partNumber || part.partNumber <= 0) {
+    if (!part.partId || part.partId <= 0) {
       errors.push('Número de parte inválido');
     }
     if (!part.quantity || part.quantity <= 0) {
@@ -122,7 +122,7 @@ export const useOrderValidation = () => {
     // Validar partsToCreate
     if (dto.partsToCreate && dto.partsToCreate.length > 0) {
       dto.partsToCreate.forEach((part, index) => {
-        if (!part.partNumber || part.partNumber <= 0) {
+        if (!part.partId || part.partId <= 0) {
           errors.push(`Nueva parte ${index + 1}: número inválido`);
         }
         if (!part.quantity || part.quantity <= 0) {

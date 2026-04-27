@@ -5,7 +5,6 @@ import { useQuasar } from 'quasar';
 import type { QTableColumn } from 'quasar';
 import { useOrders } from '../composables/useOrders';
 import OrderFilters from '../components/OrderFilters.vue';
-import AssignPartsDialog from '../components/AssignPartsDialog.vue';
 import type { Order } from '../interfaces/order.interface';
 
 const router = useRouter();
@@ -26,7 +25,7 @@ const columns: QTableColumn[] = [
   {
     name: 'zone',
     label: 'Zona',
-    field: 'zoneId',
+    field: (row: Order) => row.Zone?.name ?? row.zoneId,
     align: 'center',
     sortable: true,
   },
@@ -100,16 +99,16 @@ const goToEdit = (order: Order) => {
   void router.push({ name: 'order-edit', params: { id: order.id } });
 };
 
-const handleAssign = (order: Order) => {
-  $q.dialog({
-    component: AssignPartsDialog,
-    componentProps: {
-      orderNumber: order.orderNumber,
-    },
-  }).onOk(() => {
-    void loadOrders();
-  });
-};
+// const handleAssign = (order: Order) => {
+//   $q.dialog({
+//     component: AssignPartsDialog,
+//     componentProps: {
+//       orderNumber: order.orderNumber,
+//     },
+//   }).onOk(() => {
+//     void loadOrders();
+//   });
+// };
 
 const confirmDelete = (order: Order) => {
   $q.dialog({
@@ -243,7 +242,7 @@ const getStatusLabel = (status: string) => {
           >
             <q-tooltip>Editar</q-tooltip>
           </q-btn>
-          <q-btn
+          <!-- <q-btn
             flat
             dense
             round
@@ -253,7 +252,7 @@ const getStatusLabel = (status: string) => {
             @click="handleAssign(props.row)"
           >
             <q-tooltip>Asignar partes</q-tooltip>
-          </q-btn>
+          </q-btn> -->
           <q-btn
             flat
             dense

@@ -1,14 +1,14 @@
 // DTO para crear una orden
 export interface CreateOrderDto {
-  zoneId: number;
+  zoneId: number | null;
   totalUnits: number;
   totalParts: number;
   orderNumber: string;
-  parts: CreateOrderPartDto[];
+  details: CreateOrderDetailDto[];
 }
 
-export interface CreateOrderPartDto {
-  partNumber: number;
+export interface CreateOrderDetailDto {
+  partId: number;
   quantity: number;
   pickerId: number;
 }
@@ -18,7 +18,7 @@ export interface UpdateOrderDto {
   orderNumber?: string;
   zoneId?: number;
   totalUnits?: number;
-  partsToCreate?: CreateOrderPartDto[];
+  partsToCreate?: CreateOrderDetailDto[];
   partsToUpdate?: UpdateOrderPartDto[];
   partIdsToDelete?: number[];
 }
@@ -50,4 +50,5 @@ export interface OrderSearchParams {
   packerId?: number;
   recheckerId?: number;
   orderNumber?: string;
+  status?: string;
 }

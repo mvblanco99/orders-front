@@ -5,6 +5,8 @@ import EssentialLink, {
 } from 'src/modules/start/components/EssentialLink.vue';
 import { OrdersRoutesEnum } from 'src/modules/orders/router';
 import useAuth from 'src/modules/auth/composables/useAuth';
+import { ZonesRoutesEnum } from 'src/modules/settings/zones/router';
+import { UsersRoutesEnum } from 'src/modules/settings/users/router';
 
 const { user, logout } = useAuth();
 
@@ -28,14 +30,14 @@ const menuLinks: EssentialLinkProps[] = [
     link: { name: OrdersRoutesEnum.OrderList }, // Listado de órdenes (ruta nombrada)
   },
   {
-    title: 'Nueva orden',
-    icon: 'sym_r_add',
-    link: { name: OrdersRoutesEnum.OrderCreate }, // Crear orden (ruta nombrada)
+    title: 'Zonas',
+    icon: 'sym_r_group',
+    link: { name: ZonesRoutesEnum.ZONE_LIST },
   },
   {
-    title: 'Clientes',
+    title: 'Usuarios',
     icon: 'sym_r_group',
-    link: '#', // Cambiar por tu ruta
+    link: { name: UsersRoutesEnum.USER_LIST },
   },
 ];
 

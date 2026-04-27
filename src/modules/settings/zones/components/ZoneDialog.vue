@@ -38,8 +38,9 @@ const onSubmit = async () => {
 
         <q-card-section class="flex row q-col-gutter-md">
           <q-input
+            v-if="isEditing"
             class="col-12"
-            v-model="zoneDto.code"
+            v-model="zoneDto.id"
             type="text"
             dense
             outlined
@@ -53,15 +54,6 @@ const onSubmit = async () => {
             label="Nombre"
             dense
             outlined
-            :rules="[isRequired]"
-          />
-
-          <q-input
-            class="col-12"
-            v-model="zoneDto.description"
-            dense
-            outlined
-            label="Descripción"
             :rules="[isRequired]"
           />
 

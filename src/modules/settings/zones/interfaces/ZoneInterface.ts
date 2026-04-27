@@ -1,9 +1,6 @@
 export interface ZoneItem {
   id: number;
-  code: string;
   name: string;
-  description: string;
-  routeId: number | null;
   isActive: boolean;
   isDeleted: boolean;
   createdAt: string;
@@ -27,8 +24,6 @@ export interface ZoneFilter {
 
 export interface ZoneDto {
   id: number | undefined;
-  code: string;
   name: string;
-  description: string;
   isActive: boolean;
 }

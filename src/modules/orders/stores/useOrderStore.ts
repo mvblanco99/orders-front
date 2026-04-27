@@ -5,11 +5,11 @@ import type { CreateOrderDto, UpdateOrderDto, OrderSearchParams } from '../inter
 
 // Estado inicial para CreateOrderDto
 const initialCreateOrderDto: CreateOrderDto = {
-  zoneId: 0,
+  zoneId: null,
   totalUnits: 0,
   totalParts: 0,
   orderNumber: '',
-  parts: [],
+  details: [],
 };
 
 // Estado inicial para UpdateOrderDto

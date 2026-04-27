@@ -1,4 +1,4 @@
-import { computed, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import type { QTable, QTableProps } from 'quasar';
 import { useQuery } from '@tanstack/vue-query';
 
@@ -12,6 +12,13 @@ export enum queryKeyZones {
 export const useZoneQuery = () => {
   const { zones, zoneFilters, zonePagination, setZonesPagination, setZonesInputSearch } =
     useManageZone();
+
+  const zoneOptions = ref<
+    {
+      label: string;
+      value: number | undefined;
+    }[]
+  >([]);
 
   const queryKey = computed(() => [
     queryKeyZones.ZONES,
@@ -41,6 +48,13 @@ export const useZoneQuery = () => {
     if (!newVal) return;
     zones.value = newVal.data;
     zonePagination.value!.rowsNumber = newVal.meta.total || 0;
+
+    zones.value.forEach((z) => {
+      zoneOptions.value.push({
+        label: z.name,
+        value: z.id,
+      });
+    });
   });
 
   const totalZones = computed(() => zonesQuery.data?.value?.meta.total || 0);
@@ -58,14 +72,8 @@ export const useZoneQuery = () => {
   };
 
   const columnTable: QTable['columns'] = [
-    { name: 'code', label: 'Código', field: 'code', align: 'left' },
+    { name: 'id', label: 'Código', field: 'id', align: 'left' },
     { name: 'name', label: 'Nombre', field: 'name', align: 'left' },
-    {
-      name: 'description',
-      label: 'Descripción',
-      field: 'description',
-      align: 'left',
-    },
     { name: 'isActive', label: 'Activo', field: 'isActive', align: 'center' },
     {
       name: 'actions',
@@ -86,6 +94,7 @@ export const useZoneQuery = () => {
     totalZones,
     zoneFilters,
     zonePagination,
+    zoneOptions,
 
     // Actions
     onRequest,
