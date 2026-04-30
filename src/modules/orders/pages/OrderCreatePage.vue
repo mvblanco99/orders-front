@@ -126,11 +126,22 @@ const handleCancel = () => {
 
 <template>
   <q-page padding>
-    <div class="q-mb-lg">
-      <h1 class="text-h4 text-weight-semi-bold q-ma-none">Crear nueva orden</h1>
-      <p class="text-body2 text-grey-700 q-mt-xs q-mb-none">
-        Complete los datos de la orden y sus partes
-      </p>
+    <div class="row items-center q-mb-lg">
+      <q-btn
+        flat
+        round
+        dense
+        icon="sym_r_arrow_back"
+        color="grey-7"
+        class="q-mr-md"
+        @click="handleCancel"
+      />
+      <div>
+        <h1 class="text-h4 text-weight-semi-bold q-ma-none">Crear nueva orden</h1>
+        <p class="text-body2 text-grey-700 q-mt-xs q-mb-none">
+          Complete los datos de la orden y sus partes
+        </p>
+      </div>
     </div>
 
     <q-stepper v-model="step" vertical color="primary" animated flat class="shadow-1">

@@ -1,13 +1,7 @@
 import { storeToRefs } from 'pinia';
 import { Loading } from 'quasar';
 import { useOrderStore } from '../stores/useOrderStore';
-import {
-  createOrder as apiCreateOrder,
-  findAllOrders,
-  findOrderById,
-  updateOrder as apiUpdateOrder,
-  deleteOrder as apiDeleteOrder,
-} from '../api/ordersApi';
+import { findAllOrders, findOrderById, deleteOrder as apiDeleteOrder } from '../api/ordersApi';
 import useNotify from '../../shared/composables/useNotify';
 import useHandlerErrors from '../../shared/composables/useHandlerErrors';
 import type { OrderSearchParams } from '../interfaces/order.dto';
@@ -17,16 +11,8 @@ export const useOrders = () => {
   const notify = useNotify();
   const { handleApiResponseError } = useHandlerErrors();
 
-  const {
-    orders,
-    orderDetail,
-    createOrderDto,
-    updateOrderDto,
-    searchParams,
-    totalOrders,
-    currentPage,
-    totalPages,
-  } = storeToRefs(orderStore);
+  const { orders, orderDetail, searchParams, totalOrders, currentPage, totalPages } =
+    storeToRefs(orderStore);
 
   /**
    * Obtener lista de órdenes con filtros
@@ -75,48 +61,6 @@ export const useOrders = () => {
   };
 
   /**
-   * Crear una nueva orden
-   */
-  const createOrder = async () => {
-    Loading.show({
-      message: 'Creando orden...',
-    });
-
-    try {
-      const newOrder = await apiCreateOrder(createOrderDto.value);
-      notify.successNotify('Orden creada exitosamente');
-      orderStore.resetCreateOrderDto();
-      return newOrder;
-    } catch (error) {
-      handleApiResponseError(error);
-      throw error;
-    } finally {
-      Loading.hide();
-    }
-  };
-
-  /**
-   * Actualizar una orden existente
-   */
-  const updateOrder = async (id: number) => {
-    Loading.show({
-      message: 'Actualizando orden...',
-    });
-
-    try {
-      const updatedOrder = await apiUpdateOrder(id, updateOrderDto.value);
-      notify.successNotify('Orden actualizada exitosamente');
-      orderStore.resetUpdateOrderDto();
-      return updatedOrder;
-    } catch (error) {
-      handleApiResponseError(error);
-      throw error;
-    } finally {
-      Loading.hide();
-    }
-  };
-
-  /**
    * Eliminar una orden
    */
   const deleteOrder = async (id: number) => {
@@ -149,8 +93,6 @@ export const useOrders = () => {
     // State
     orders,
     orderDetail,
-    createOrderDto,
-    updateOrderDto,
     searchParams,
     totalOrders,
     currentPage,
@@ -159,8 +101,6 @@ export const useOrders = () => {
     // Actions
     fetchOrders,
     fetchOrderById,
-    createOrder,
-    updateOrder,
     deleteOrder,
     changePage,
   };

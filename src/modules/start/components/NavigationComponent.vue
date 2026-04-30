@@ -7,6 +7,8 @@ import { OrdersRoutesEnum } from 'src/modules/orders/router';
 import useAuth from 'src/modules/auth/composables/useAuth';
 import { ZonesRoutesEnum } from 'src/modules/settings/zones/router';
 import { UsersRoutesEnum } from 'src/modules/settings/users/router';
+import { ProfileRoutesEnum } from 'src/modules/settings/profiles/router';
+import { MenuRoutesEnum } from 'src/modules/settings/menuItems/router';
 
 const { user, logout } = useAuth();
 
@@ -38,6 +40,16 @@ const menuLinks: EssentialLinkProps[] = [
     title: 'Usuarios',
     icon: 'sym_r_group',
     link: { name: UsersRoutesEnum.USER_LIST },
+  },
+  {
+    title: 'Perfiles',
+    icon: 'sym_r_badge',
+    link: { name: ProfileRoutesEnum.PROFILES },
+  },
+  {
+    title: 'Menú Items',
+    icon: 'sym_r_menu',
+    link: { name: MenuRoutesEnum.MENU_LIST },
   },
 ];
 

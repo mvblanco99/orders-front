@@ -1,13 +1,17 @@
 import { api } from 'src/boot/axios';
 import type {
   Order,
+  OrderDetail,
   OrdersResponse,
   OrderAssignResponse,
   AssignPartsResponse,
 } from '../interfaces/order.interface';
 import type {
   CreateOrderDto,
+  AddOrderDetailDto,
   UpdateOrderDto,
+  UpdateOrderHeaderDto,
+  UpdateOrderDetailDto,
   AssignPartsDto,
   OrderSearchParams,
 } from '../interfaces/order.dto';
@@ -36,8 +40,12 @@ export const findAllOrders = async (params?: OrderSearchParams): Promise<OrdersR
  * Obtener una orden por ID
  * GET /orders/:id
  */
-export const findOrderById = async (id: number): Promise<Order> => {
-  const res = await api.get<Order>(`${resourceUrl}/${id}`);
+/**
+ * Obtener una orden por ID
+ * GET /orders/:id
+ */
+export const findOrderById = async (id: number, viewAll = false): Promise<Order> => {
+  const res = await api.get<Order>(`${resourceUrl}/${id}`, { params: { viewAll } });
   return res.data;
 };
 
@@ -57,6 +65,47 @@ export const findOrderForAssign = async (orderNumber: string): Promise<OrderAssi
 export const updateOrder = async (id: number, body: UpdateOrderDto): Promise<Order> => {
   const res = await api.patch<Order>(`${resourceUrl}/${id}`, body);
   return res.data;
+};
+
+/**
+ * Actualizar la cabecera de una orden (número, zona, totalUnits)
+ * PATCH /orders/:id/header
+ */
+export const updateOrderHeader = async (id: number, body: UpdateOrderHeaderDto): Promise<Order> => {
+  const res = await api.patch<Order>(`${resourceUrl}/${id}/header`, body);
+  return res.data;
+};
+
+/**
+ * Agregar un nuevo detalle/parte a una orden existente
+ * POST /orders/:orderNumber/details
+ */
+export const addOrderDetail = async (
+  orderNumber: string,
+  body: AddOrderDetailDto,
+): Promise<OrderDetail> => {
+  const res = await api.post<OrderDetail>(`${resourceUrl}/${orderNumber}/details`, body);
+  return res.data;
+};
+
+/**
+ * Actualizar el detalle de una orden (cantidad, picker, rechecker, packer)
+ * PATCH /orders/details/:id
+ */
+export const updateOrderDetail = async (
+  id: number,
+  body: UpdateOrderDetailDto,
+): Promise<OrderDetail> => {
+  const res = await api.patch<OrderDetail>(`${resourceUrl}/details/${id}`, body);
+  return res.data;
+};
+
+/**
+ * Deshabilitar un detalle de la orden y su parte asociada (soft delete)
+ * DELETE /orders/details/:id
+ */
+export const removeOrderDetail = async (id: number): Promise<void> => {
+  await api.delete(`${resourceUrl}/details/${id}`);
 };
 
 /**

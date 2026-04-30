@@ -1,25 +1,16 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import type { QTableColumn } from 'quasar';
-import { useOrders } from '../composables/useOrders';
+import { useOrderByIdQuery } from '../composables/useOrderByIdQuery';
 import { OrderStatus } from '../interfaces/order.interface';
 
 const route = useRoute();
 const router = useRouter();
-const { orderDetail, fetchOrderById } = useOrders();
-const loading = ref(false);
-
 const orderId = Number(route.params.id);
 
-onMounted(async () => {
-  loading.value = true;
-  try {
-    await fetchOrderById(orderId);
-  } finally {
-    loading.value = false;
-  }
-});
+const { orderDetail, isLoading, isFetching } = useOrderByIdQuery(orderId, true);
+const loading = computed(() => isLoading.value || isFetching.value);
 
 const goBack = () => {
   void router.push({ name: 'order-list' });
@@ -96,7 +87,14 @@ const detailRows = computed(() => {
           <p class="text-body2 text-grey-700 q-mt-xs q-mb-none">Detalle completo de la orden</p>
         </div>
         <q-space />
-        <q-btn unelevated color="primary" icon="sym_r_edit" label="Editar" @click="goToEdit" />
+        <q-btn
+          v-if="orderDetail.status !== OrderStatus.CANCELLED"
+          unelevated
+          color="primary"
+          icon="sym_r_edit"
+          label="Editar"
+          @click="goToEdit"
+        />
       </div>
 
       <!-- Información general -->

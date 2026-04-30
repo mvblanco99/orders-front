@@ -13,6 +13,11 @@ export interface CreateOrderDetailDto {
   pickerId: number;
 }
 
+export interface AddOrderDetailDto {
+  quantity: number;
+  pickerId: number;
+}
+
 // DTO para actualizar una orden
 export interface UpdateOrderDto {
   orderNumber?: string;
@@ -21,6 +26,21 @@ export interface UpdateOrderDto {
   partsToCreate?: CreateOrderDetailDto[];
   partsToUpdate?: UpdateOrderPartDto[];
   partIdsToDelete?: number[];
+}
+
+// DTO para actualizar la cabecera de una orden
+export interface UpdateOrderHeaderDto {
+  orderNumber: string;
+  zoneId: number;
+  totalUnits: number;
+}
+
+// DTO para actualizar el detalle de una orden (una parte)
+export interface UpdateOrderDetailDto {
+  quantity: number;
+  pickerId: number;
+  recheckerId?: number | null;
+  packerId?: number | null;
 }
 
 export interface UpdateOrderPartDto {

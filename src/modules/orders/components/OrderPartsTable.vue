@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import type { QTableColumn } from 'quasar';
-import type { OrderPart } from '../interfaces/order.interface';
+import type { OrderDetail } from '../interfaces/order.interface';
 
 interface Props {
-  parts: OrderPart[];
+  parts: OrderDetail[];
   loading?: boolean;
   editable?: boolean;
 }
@@ -15,15 +15,15 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const emit = defineEmits<{
-  edit: [part: OrderPart];
+  edit: [part: OrderDetail];
   delete: [partId: number];
 }>();
 
 const columns: QTableColumn[] = [
   {
-    name: 'partNumber',
+    name: 'partId',
     label: 'Parte #',
-    field: 'partNumber',
+    field: 'partId',
     align: 'center',
     sortable: true,
   },
@@ -37,25 +37,23 @@ const columns: QTableColumn[] = [
   {
     name: 'picker',
     label: 'Picker',
-    field: 'pickerId',
+    field: (row: OrderDetail) => row.Parts[0]?.Picker,
     align: 'left',
-    sortable: true,
+    sortable: false,
   },
   {
     name: 'rechecker',
     label: 'Rechecker',
-    field: 'recheckerId',
+    field: (row: OrderDetail) => row.Parts[0]?.Rechecker,
     align: 'left',
-    sortable: true,
-    format: (val: number | null) => (val ? `ID: ${val}` : 'Sin asignar'),
+    sortable: false,
   },
   {
     name: 'packer',
     label: 'Packer',
-    field: 'packerId',
+    field: (row: OrderDetail) => row.Parts[0]?.Packer,
     align: 'left',
-    sortable: true,
-    format: (val: number | null) => (val ? `ID: ${val}` : 'Sin asignar'),
+    sortable: false,
   },
 ];
 
@@ -72,7 +70,7 @@ const totalQuantity = computed(() => {
   return props.parts.reduce((sum, part) => sum + part.quantity, 0);
 });
 
-const handleEdit = (part: OrderPart) => {
+const handleEdit = (part: OrderDetail) => {
   emit('edit', part);
 };
 
@@ -107,22 +105,30 @@ const handleDelete = (partId: number) => {
 
       <template v-slot:body-cell-picker="slotProps">
         <q-td :props="slotProps">
-          <q-chip size="sm" color="primary" text-color="white" dense>
-            Picker ID: {{ slotProps.row.pickerId }}
+          <q-chip
+            v-if="slotProps.row.Parts[0]?.Picker"
+            size="sm"
+            color="primary"
+            text-color="white"
+            dense
+          >
+            {{ slotProps.row.Parts[0].Picker.name }} {{ slotProps.row.Parts[0].Picker.lastName }}
           </q-chip>
+          <q-badge v-else color="grey-5" text-color="grey-8" label="Sin asignar" />
         </q-td>
       </template>
 
       <template v-slot:body-cell-rechecker="slotProps">
         <q-td :props="slotProps">
           <q-chip
-            v-if="slotProps.row.recheckerId"
+            v-if="slotProps.row.Parts[0]?.Rechecker"
             size="sm"
             color="positive"
             text-color="white"
             dense
           >
-            Rechecker ID: {{ slotProps.row.recheckerId }}
+            {{ slotProps.row.Parts[0].Rechecker.name }}
+            {{ slotProps.row.Parts[0].Rechecker.lastName }}
           </q-chip>
           <q-badge v-else color="grey-5" text-color="grey-8" label="Sin asignar" />
         </q-td>
@@ -131,13 +137,13 @@ const handleDelete = (partId: number) => {
       <template v-slot:body-cell-packer="slotProps">
         <q-td :props="slotProps">
           <q-chip
-            v-if="slotProps.row.packerId"
+            v-if="slotProps.row.Parts[0]?.Packer"
             size="sm"
             color="secondary"
             text-color="white"
             dense
           >
-            Packer ID: {{ slotProps.row.packerId }}
+            {{ slotProps.row.Parts[0].Packer.name }} {{ slotProps.row.Parts[0].Packer.lastName }}
           </q-chip>
           <q-badge v-else color="grey-5" text-color="grey-8" label="Sin asignar" />
         </q-td>
@@ -164,10 +170,12 @@ const handleDelete = (partId: number) => {
             icon="sym_r_delete"
             color="negative"
             @click="handleDelete(slotProps.row.id)"
-            :disable="!!slotProps.row.recheckerId"
+            :disable="!!slotProps.row.Parts[0]?.recheckerId"
           >
             <q-tooltip>{{
-              slotProps.row.recheckerId ? 'No se puede eliminar (ya asignada)' : 'Eliminar'
+              slotProps.row.Parts[0]?.recheckerId
+                ? 'No se puede eliminar (ya asignada)'
+                : 'Eliminar'
             }}</q-tooltip>
           </q-btn>
         </q-td>

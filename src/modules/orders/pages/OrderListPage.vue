@@ -1,18 +1,43 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import type { QTableColumn } from 'quasar';
-import { useOrders } from '../composables/useOrders';
+import { useOrdersQuery } from '../composables/useOrdersQuery';
+import { useDeleteOrderMutation } from '../composables/useDeleteOrderMutation';
 import OrderFilters from '../components/OrderFilters.vue';
 import type { Order } from '../interfaces/order.interface';
+import { OrderStatus } from '../interfaces/order.interface';
+import useNotify from 'src/modules/shared/composables/useNotify';
 
 const router = useRouter();
 const $q = useQuasar();
-const { orders, totalOrders, currentPage, fetchOrders, deleteOrder } = useOrders();
+const { errorNotify } = useNotify();
+const {
+  orders,
+  totalOrders,
+  currentPage,
+  isLoading,
+  isFetching,
+  isError,
+  error,
+  commitSearch,
+  commitClear,
+  commitPage,
+} = useOrdersQuery();
+const { deleteOrderMutation } = useDeleteOrderMutation();
 
-const loading = ref(false);
+const loading = computed(() => isLoading.value || isFetching.value);
 const showFilters = ref(false);
+
+watch(isError, (val) => {
+  if (val) {
+    errorNotify(
+      (error.value as Error)?.message ||
+        'Ocurrió un error al cargar las órdenes. Intente nuevamente.',
+    );
+  }
+});
 
 const columns: QTableColumn[] = [
   {
@@ -66,27 +91,6 @@ const columns: QTableColumn[] = [
   },
 ];
 
-onMounted(async () => {
-  await loadOrders();
-});
-
-const loadOrders = async () => {
-  loading.value = true;
-  try {
-    await fetchOrders();
-  } finally {
-    loading.value = false;
-  }
-};
-
-const handleSearch = async () => {
-  await loadOrders();
-};
-
-const handleClear = async () => {
-  await loadOrders();
-};
-
 const goToCreate = () => {
   void router.push({ name: 'order-create' });
 };
@@ -99,16 +103,17 @@ const goToEdit = (order: Order) => {
   void router.push({ name: 'order-edit', params: { id: order.id } });
 };
 
-// const handleAssign = (order: Order) => {
-//   $q.dialog({
-//     component: AssignPartsDialog,
-//     componentProps: {
-//       orderNumber: order.orderNumber,
-//     },
-//   }).onOk(() => {
-//     void loadOrders();
-//   });
-// };
+const handleSearch = () => {
+  commitSearch();
+};
+
+const handleClear = () => {
+  commitClear();
+};
+
+const handlePageChange = (pagination: { page: number; rowsPerPage: number }) => {
+  commitPage(pagination);
+};
 
 const confirmDelete = (order: Order) => {
   $q.dialog({
@@ -126,12 +131,7 @@ const confirmDelete = (order: Order) => {
     },
     persistent: true,
   }).onOk(() => {
-    const exec = async () => {
-      await deleteOrder(order.id);
-      await loadOrders();
-    };
-
-    void exec();
+    deleteOrderMutation.mutate(order.id);
   });
 };
 
@@ -207,7 +207,7 @@ const getStatusLabel = (status: string) => {
         rowsPerPage: 10,
         rowsNumber: totalOrders,
       }"
-      @request="loadOrders"
+      @request="(evt) => handlePageChange(evt.pagination)"
     >
       <template v-slot:body-cell-status="props">
         <q-td :props="props">
@@ -232,6 +232,7 @@ const getStatusLabel = (status: string) => {
             <q-tooltip>Ver detalle</q-tooltip>
           </q-btn>
           <q-btn
+            v-if="props.row.status !== OrderStatus.CANCELLED"
             flat
             dense
             round
@@ -242,18 +243,8 @@ const getStatusLabel = (status: string) => {
           >
             <q-tooltip>Editar</q-tooltip>
           </q-btn>
-          <!-- <q-btn
-            flat
-            dense
-            round
-            size="sm"
-            icon="sym_r_assignment"
-            color="info"
-            @click="handleAssign(props.row)"
-          >
-            <q-tooltip>Asignar partes</q-tooltip>
-          </q-btn> -->
           <q-btn
+            v-if="props.row.status !== OrderStatus.CANCELLED"
             flat
             dense
             round
