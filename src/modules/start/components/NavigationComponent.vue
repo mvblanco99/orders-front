@@ -4,11 +4,13 @@ import EssentialLink, {
   type EssentialLinkProps,
 } from 'src/modules/start/components/EssentialLink.vue';
 import { OrdersRoutesEnum } from 'src/modules/orders/router';
+import { RecheckerRoutesEnum } from 'src/modules/rechecker/router';
 import useAuth from 'src/modules/auth/composables/useAuth';
 import { ZonesRoutesEnum } from 'src/modules/settings/zones/router';
 import { UsersRoutesEnum } from 'src/modules/settings/users/router';
 import { ProfileRoutesEnum } from 'src/modules/settings/profiles/router';
 import { MenuRoutesEnum } from 'src/modules/settings/menuItems/router';
+import { FailuresRoutesEnum } from 'src/modules/failures/router';
 
 const { user, logout } = useAuth();
 
@@ -30,6 +32,16 @@ const menuLinks: EssentialLinkProps[] = [
     title: 'Órdenes',
     icon: 'sym_r_inventory_2',
     link: { name: OrdersRoutesEnum.OrderList }, // Listado de órdenes (ruta nombrada)
+  },
+  {
+    title: 'Rechequeador',
+    icon: 'sym_r_fact_check',
+    link: { name: RecheckerRoutesEnum.RecheckerAssign },
+  },
+  {
+    title: 'Fallas de Órdenes',
+    icon: 'sym_r_inventory_2',
+    link: { name: FailuresRoutesEnum.FailuresRegister }, // Listado de órdenes (ruta nombrada)
   },
   {
     title: 'Zonas',
